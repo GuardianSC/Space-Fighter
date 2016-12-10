@@ -6,18 +6,21 @@ using System.Collections;
 [RequireComponent(typeof(MeshCollider))]
 public class SpaceController : NetworkBehaviour
 {
-    //SpaceCamera cam;
+    Projectiles projectiles;
 
     public Rigidbody rb;
     public MeshCollider mc;
+
+    public Transform shotSpawn;
+    public GameObject shot;
 
     public float turnSpeed   = 5;
     public float speed       = 5;
     public float trueSpeed   = 0;
     public float strafeSpeed = 5;
 
-    public Transform shotSpawn;
-    public GameObject shot;
+    public const int maxHealth = 100;
+    int health = maxHealth;
     public float fireRate;
     public float nextFire;
 
@@ -58,11 +61,13 @@ public class SpaceController : NetworkBehaviour
         //transform.Translate(targetVelocity);
         //transform.position = Vector3.Lerp(transform.position, targetVelocity, currentSpeed * Time.deltaTime);
     }
-
+    
     void Update()
     {
         if (!isLocalPlayer)
+        {
             return;
+        }
 
         /// Shooting
         CmdShoot();
@@ -84,5 +89,13 @@ public class SpaceController : NetworkBehaviour
      public override void OnStartLocalPlayer()
     {
         GetComponent<MeshRenderer>().material.color = Color.blue;
+    }
+
+    void OnCollisionEnter(Collision collider)
+    {
+        if (collider.gameObject.tag == "EnemyProjectile")
+        {
+            health -= 20; // 20 is projectile damage
+        }
     }
 }
