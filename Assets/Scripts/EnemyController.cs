@@ -17,8 +17,9 @@ public class EnemyController : NetworkBehaviour
     public int maxHealth;
     public int health;
     
-    public float fireRate;
-    public float nextFire;
+    public float fireRate = .5f;
+    public float nextFire = .5f;
+    public float fireTime = 0;
 
     // Use this for initialization
     void Start ()
@@ -26,13 +27,14 @@ public class EnemyController : NetworkBehaviour
         rb = GetComponent<Rigidbody>();
         mc = GetComponent<MeshCollider>();
         health = maxHealth;
+        // Enemies wait 2 seconds, then fire once every 1.5 seconds
+        InvokeRepeating("Shoot", 2.0f, 1.5f);
 	}
 	
 	// Update is called once per frame
 	void Update ()
     {
-        CmdShoot();
-
+        //Shoot();
 
         if (health <= 0)
             Destroy(gameObject);
@@ -46,13 +48,16 @@ public class EnemyController : NetworkBehaviour
         }
     }
 
-    
-    void CmdShoot()
+    void Shoot()
     {
-            nextFire = Time.time + fireRate;
-            GameObject clone = (GameObject)Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
-            Vector3 force = shotSpawn.forward * 500;
-            clone.GetComponent<Rigidbody>().AddForce(force, ForceMode.Force);
-            NetworkServer.Spawn(clone);
+        //fireTime = fireTime + Time.deltaTime;
+        
+        GameObject clone = (GameObject)Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
+        //nextFire = fireTime + fireRate;
+        Vector3 force = shotSpawn.forward * 500;
+        clone.GetComponent<Rigidbody>().AddForce(force, ForceMode.Force);
+        NetworkServer.Spawn(clone);
+        //nextFire = nextFire - fireTime;
+        //fireTime = 0;
     }
 }

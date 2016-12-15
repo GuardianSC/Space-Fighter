@@ -20,9 +20,11 @@ public class SpaceController : NetworkBehaviour
     public float strafeSpeed = 5;
 
     public const int maxHealth = 100;
-    int health = maxHealth;
-    public float fireRate;
-    public float nextFire;
+    public int health = maxHealth;
+
+    public float fireRate = .5f;
+    public float nextFire = .5f;
+    public float fireTime = 0;
 
     // Use this for initialization
     void Start()
@@ -69,21 +71,28 @@ public class SpaceController : NetworkBehaviour
             return;
         }
 
-        /// Shooting
-        CmdShoot();
+        // Shooting
+        if (Input.GetButtonDown("Fire1") && fireRate >= 0)
+            Invoke("CmdShoot", 0.1f);
+        //CmdShoot();
+        if (health <= 0)
+            Destroy(gameObject); 
     }
 
     [Command]
     void CmdShoot()
     {
-        if (Input.GetButton("Fire1") && Time.time > nextFire)
-        {
-            nextFire = Time.time + fireRate;
+        //fireTime = fireTime + Time.deltaTime;
+        //if (Input.GetButton("Fire1") && fireRate >= 0)
+        //{
+            //nextFire = fireTime + fireRate;
             GameObject clone = (GameObject)Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
             Vector3 force = shotSpawn.forward * 500;
             clone.GetComponent<Rigidbody>().AddForce(force, ForceMode.Force);
             NetworkServer.Spawn(clone);
-        }
+            //nextFire = nextFire - fireTime;
+            //fireTime = 0;
+        //}
     }
 
      public override void OnStartLocalPlayer()
