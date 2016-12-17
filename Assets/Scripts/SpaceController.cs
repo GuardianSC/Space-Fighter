@@ -6,10 +6,10 @@ using System.Collections;
 [RequireComponent(typeof(MeshCollider))]
 public class SpaceController : NetworkBehaviour
 {
-    Projectiles projectiles;
-
     public Rigidbody rb;
     public MeshCollider mc;
+
+    //public GameObject playerPrefab;
 
     public Transform shotSpawn;
     public GameObject shot;
@@ -20,29 +20,25 @@ public class SpaceController : NetworkBehaviour
     public float strafeSpeed = 5;
 
     public const int maxHealth = 100;
-    public int health = maxHealth;
-
-    public float fireRate = .5f;
-    public float nextFire = .5f;
-    public float fireTime = 0;
+    public int health;
+    public float respawnTimer = 5;
 
     // Use this for initialization
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         mc = GetComponent<MeshCollider>();
+        health = maxHealth;
     }
 
-    // Update is called once per frame
+    // Fixed update does the physics stuff (like movement)
     void FixedUpdate()
     {
-        /// Movement
         float r = Input.GetAxis("Roll");
         float p = Input.GetAxis("Pitch");
         float y = Input.GetAxis("Yaw");
         float v = Input.GetAxisRaw("Vertical");
         float h = Input.GetAxisRaw("Horizontal");
-        float s = Input.GetAxis("Stop");
         
         Vector3 movement = new Vector3(h * strafeSpeed * Time.deltaTime, 0, v * strafeSpeed * Time.deltaTime);
 
@@ -52,47 +48,44 @@ public class SpaceController : NetworkBehaviour
             speed += Time.deltaTime;
         if (trueSpeed == 0)
             speed = trueSpeed;
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetButton("Stop"))
             speed = 0;
 
         rb.AddRelativeTorque(p * turnSpeed * Time.deltaTime, y * turnSpeed * Time.deltaTime, r * turnSpeed * Time.deltaTime);
         rb.AddRelativeForce(0, 0, trueSpeed * speed * Time.deltaTime);
         rb.AddRelativeForce(movement);
-
-        //Vector3 targetVelocity = (transform.forward * speed) * t;
-        //transform.Translate(targetVelocity);
-        //transform.position = Vector3.Lerp(transform.position, targetVelocity, currentSpeed * Time.deltaTime);
     }
-    
+
+    // Update is called once per frame
     void Update()
     {
         if (!isLocalPlayer)
-        {
             return;
-        }
 
         // Shooting
-        if (Input.GetButtonDown("Fire1") && fireRate >= 0)
+        if (Input.GetButtonDown("Fire1"))
             Invoke("CmdShoot", 0.1f);
-        //CmdShoot();
+
         if (health <= 0)
-            Destroy(gameObject); 
+        {
+            RpcRespawn();
+        }
     }
 
     [Command]
     void CmdShoot()
     {
-        //fireTime = fireTime + Time.deltaTime;
-        //if (Input.GetButton("Fire1") && fireRate >= 0)
-        //{
-            //nextFire = fireTime + fireRate;
-            GameObject clone = (GameObject)Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
-            Vector3 force = shotSpawn.forward * 500;
-            clone.GetComponent<Rigidbody>().AddForce(force, ForceMode.Force);
-            NetworkServer.Spawn(clone);
-            //nextFire = nextFire - fireTime;
-            //fireTime = 0;
-        //}
+        GameObject clone = (GameObject)Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
+        Vector3 force = shotSpawn.forward * 500;
+        clone.GetComponent<Rigidbody>().AddForce(force, ForceMode.Force);
+        NetworkServer.Spawn(clone);
+    }
+
+    [ClientRpc]
+    void RpcRespawn()
+    {
+        if (isLocalPlayer)
+            transform.position = Vector3.zero;
     }
 
      public override void OnStartLocalPlayer()
@@ -104,7 +97,9 @@ public class SpaceController : NetworkBehaviour
     {
         if (collider.gameObject.tag == "EnemyProjectile")
         {
+            rb.freezeRotation = true;
             health -= 20; // 20 is projectile damage
+            rb.freezeRotation = false;
         }
     }
 }

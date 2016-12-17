@@ -6,8 +6,6 @@ using System.Collections;
 [RequireComponent(typeof(MeshCollider))]
 public class EnemyController : NetworkBehaviour
 {
-    Projectiles projectiles;
-
     public Rigidbody rb;
     public MeshCollider mc;
 
@@ -16,10 +14,8 @@ public class EnemyController : NetworkBehaviour
 
     public int maxHealth;
     public int health;
-    
-    public float fireRate = .5f;
-    public float nextFire = .5f;
-    public float fireTime = 0;
+
+    public bool isCapitalShip;
 
     // Use this for initialization
     void Start ()
@@ -27,15 +23,17 @@ public class EnemyController : NetworkBehaviour
         rb = GetComponent<Rigidbody>();
         mc = GetComponent<MeshCollider>();
         health = maxHealth;
-        // Enemies wait 2 seconds, then fire once every 1.5 seconds
-        InvokeRepeating("Shoot", 2.0f, 1.5f);
-	}
+        // Enemies wait a second, then fire once every second
+        if (!isCapitalShip)
+            InvokeRepeating("Shoot", 1, 1);
+        // Capital ships fire once every 3 seconds
+        if (isCapitalShip)
+            InvokeRepeating("Shoot", 2.0f, 3f);
+    }
 	
 	// Update is called once per frame
 	void Update ()
     {
-        //Shoot();
-
         if (health <= 0)
             Destroy(gameObject);
 	}
@@ -44,20 +42,17 @@ public class EnemyController : NetworkBehaviour
     {
         if (collider.gameObject.tag == "PlayerProjectile")
         {
+            rb.freezeRotation = true;
             health -= 20; // 20 is projectile damage
+            rb.freezeRotation = false;
         }
     }
 
     void Shoot()
     {
-        //fireTime = fireTime + Time.deltaTime;
-        
         GameObject clone = (GameObject)Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
-        //nextFire = fireTime + fireRate;
         Vector3 force = shotSpawn.forward * 500;
         clone.GetComponent<Rigidbody>().AddForce(force, ForceMode.Force);
         NetworkServer.Spawn(clone);
-        //nextFire = nextFire - fireTime;
-        //fireTime = 0;
     }
 }
