@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
-using UnityEngine.Networking;
 using System.Collections;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(MeshCollider))]
-public class EnemyController : NetworkBehaviour
+public class EnemyController : MonoBehaviour
 {
     public Rigidbody rb;
     public MeshCollider mc;
@@ -53,6 +52,5 @@ public class EnemyController : NetworkBehaviour
         GameObject clone = (GameObject)Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
         Vector3 force = shotSpawn.forward * 500;
         clone.GetComponent<Rigidbody>().AddForce(force, ForceMode.Force);
-        NetworkServer.Spawn(clone);
     }
 }

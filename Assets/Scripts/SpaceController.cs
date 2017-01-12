@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
-using UnityEngine.Networking;
 using System.Collections;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(MeshCollider))]
-public class SpaceController : NetworkBehaviour
+public class SpaceController : MonoBehaviour
 {
     public Rigidbody rb;
     public MeshCollider mc;
@@ -59,38 +58,27 @@ public class SpaceController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!isLocalPlayer)
-            return;
-
         // Shooting
         if (Input.GetButtonDown("Fire1"))
             Invoke("CmdShoot", 0.1f);
 
+        // Respawning
         if (health <= 0)
         {
-            RpcRespawn();
+            Respawn();
         }
     }
-
-    [Command]
+    
     void CmdShoot()
     {
         GameObject clone = (GameObject)Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
         Vector3 force = shotSpawn.forward * 500;
         clone.GetComponent<Rigidbody>().AddForce(force, ForceMode.Force);
-        NetworkServer.Spawn(clone);
     }
 
-    [ClientRpc]
-    void RpcRespawn()
+    void Respawn()
     {
-        if (isLocalPlayer)
             transform.position = Vector3.zero;
-    }
-
-     public override void OnStartLocalPlayer()
-    {
-        GetComponent<MeshRenderer>().material.color = Color.blue;
     }
 
     void OnCollisionEnter(Collision collider)

@@ -13,7 +13,7 @@ public class SpaceCamera : MonoBehaviour
 	}
 	
 	// Update is called once per frame
-	void Update ()
+	public void Update ()
     {
         float h =  Input.GetAxis("Aim X") * rotationSpeed;
         float v = -Input.GetAxis("Aim Y") * rotationSpeed;
