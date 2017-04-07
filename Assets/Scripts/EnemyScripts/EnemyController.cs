@@ -49,8 +49,8 @@ public class EnemyController : MonoBehaviour
 
     void Shoot()
     {
-        GameObject clone = (GameObject)Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
-        Vector3 force = shotSpawn.forward * 500;
-        clone.GetComponent<Rigidbody>().AddForce(force, ForceMode.Force);
+            GameObject clone = (GameObject)Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
+            Vector3 force = shotSpawn.forward * 500;
+            clone.GetComponent<Rigidbody>().AddForce(force, ForceMode.Force);
     }
 }

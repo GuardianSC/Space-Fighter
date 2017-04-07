@@ -22,7 +22,7 @@ public class EnemySpawner : MonoBehaviour
         // Enemy Capitals
         for (int i = 0; i < numberOfCapitals; i++)
         {
-            Vector3 spawnPosition = new Vector3(Random.Range(100, 100), Random.Range(-10, 10), Random.Range(100, 100));
+            Vector3 spawnPosition = new Vector3(Random.Range(325, 325), Random.Range(-35, 35), Random.Range(325, 325));
             Quaternion spawnRotation = Quaternion.Euler(0, Random.Range(0, 180), 0);
 
             GameObject clone = (GameObject)Instantiate(enemyCapitalPrefab, spawnPosition, spawnRotation);
